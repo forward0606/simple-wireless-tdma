@@ -160,6 +160,7 @@ int main (int argc, char **argv)
   Config::SetDefault ("ns3::OnOffApplication::PacketSize", StringValue ("1000")); // bytes!
   Config::SetDefault ("ns3::OnOffApplication::DataRate", StringValue (rate));
 
+  LogComponentEnable("TdmaSlotAssignmentFileParser", LogLevel(LOG_WARN));
   LogComponentEnable ("TdmaExample", LOG_LEVEL_DEBUG);
 
   test = TdmaExample ();
@@ -348,15 +349,16 @@ TdmaExample::CreateDevices (std::string tr_name, bool usingWifi, double txpDista
           txp = m_transmitRangeMap[txpDistance];
         }
 
-      NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default ();
+      // WifiMacHelper replaced NqosWifiMacHelper ~ v3.28
+      WifiMacHelper wifiMac = WifiMacHelper();
       wifiMac.SetType ("ns3::AdhocWifiMac");
-      YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+      YansWifiPhyHelper wifiPhy;
       YansWifiChannelHelper wifiChannel;
       wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
       wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
       wifiPhy.SetChannel (wifiChannel.Create ());
       WifiHelper wifi;
-      wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
+      wifi.SetStandard (WIFI_STANDARD_80211b);
       wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                     "DataMode", StringValue (m_phyMode),
                                     "ControlMode", StringValue (m_phyMode));
@@ -384,7 +386,7 @@ TdmaExample::CreateDevices (std::string tr_name, bool usingWifi, double txpDista
           2,0,0,1,0,
           3,0,0,0,1);*/
       // if TDMA slot assignment is through a file
-      TdmaHelper tdma = TdmaHelper ("tdmaSlots.txt");
+      TdmaHelper tdma = TdmaHelper ("contrib/simple-wireless-tdma/examples/tdmaSlots.txt");
       TdmaControllerHelper controller;
       controller.Set ("SlotTime", TimeValue (MicroSeconds (1100)));
       controller.Set ("GuardTime", TimeValue (MicroSeconds (100)));
